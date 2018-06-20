@@ -19,6 +19,9 @@ public class Carro {
         this.fkUser = fkUser;
         this.estado = estado;
     }
+    public Carro () {
+
+    }
 
     public int getIdCarro() {
         return idCarro;
