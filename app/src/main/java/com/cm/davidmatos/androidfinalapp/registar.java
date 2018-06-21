@@ -26,12 +26,13 @@ public class registar extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.registar);
+        hideNavigationBar();
 
         blurView = (ImageView) findViewById(R.id.blurView);
 
         BlurImage.with(getApplicationContext()).load(R.drawable.backgound).intensity(25).Async(true).into(blurView);
 
-        txtNome = (EditText) findViewById(R.id.txtNome);
+        txtNome = (EditText) findViewById(R.id.txtUsername);
         txtUsername = (EditText) findViewById(R.id.txtUsername);
         txtEmail = (EditText) findViewById(R.id.txtEmail);
         txtPassword = (EditText) findViewById(R.id.txtPassword);
@@ -64,5 +65,23 @@ public class registar extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideNavigationBar();
+    }
+
+    private void hideNavigationBar() {
+        this.getWindow().getDecorView()
+                .setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                );
     }
 }

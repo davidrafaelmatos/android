@@ -1,53 +1,305 @@
 package com.cm.davidmatos.androidfinalapp.WS;
 
-import android.app.VoiceInteractor;
 import android.content.Context;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.cm.davidmatos.androidfinalapp.Utils.MySingleton;
-import com.cm.davidmatos.androidfinalapp.Utils.Utils;
+import com.android.volley.toolbox.Volley;
+
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class WS {
 
-    public HashMap<Integer, Carro> getCarro(int id){
+    private static WS ourInstance;
+    public static synchronized WS getInstance(Context context) {
+        if (ourInstance == null)
+            ourInstance = new WS(context);
 
-        HashMap<Integer, Carro> listCarro = new HashMap<Integer, Carro>();
-
-        String url = "http://davidmatos.pt/slimIOS/index.php/carro/" + String.valueOf(id);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray arr = response.getJSONArray(Carro);
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-
-                    }
-                } catch (JSONException ex) {
-                    //error
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-       // MySingleton.getInstance(login).addToRequestQueue(jsonObjectRequest);
-
-        return listCarro;
+        return ourInstance;
     }
 
+    private Context context;
+    private RequestQueue requestQueue;
+
+    private WS(Context context) {
+        this.context = context;
+        requestQueue = getRequestQueue();
+    }
+
+    private RequestQueue getRequestQueue() {
+        if (requestQueue == null)
+            requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+
+        return requestQueue;
+    }
+
+    private String url = "http://davidmatos.pt/slimIOS/index.php";
+
+    // WS for Login
+    public void Login(String username, String pass, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("username", username);
+        params.put("password", pass);
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/user/login",
+                new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
+/*
+    public void GetUserInfo(String id, Listener<JSONObject> listener, ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "user/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+    */
+
+    public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/marcas",
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetModelos(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/modelos",
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetDouBoleiasNotMine(int id, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/notmine/douboleia/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetCarrosUtilizador(int id, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/my/cars/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    /*
+    public void AddCarro(float consumos, String matricula, int fkModelo, int fkUtilizador, Listener<JSONObject> listener, ErrorListener errorListener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("consumos", consumos + "");
+        params.put("matricula", matricula);
+        params.put("fkModelo", fkModelo + "");
+        params.put("fkUtilizador", fkUtilizador + "");
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/carros/",
+                new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void UpdateUtilizador(int id, String nome, String morada, String telemovel, Listener<JSONObject> listener, ErrorListener errorListener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("nome", nome);
+        params.put("morada", morada);
+        params.put("telemovel", telemovel);
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.PUT, url + "/user/" + id,
+                new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void RemoveCarroUtilizador(int id, Listener<JSONObject> listener, ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.DELETE, url + "/carros/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetLugares(Listener<JSONObject> listener, ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/lugares/",
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetViagensUtilizadores(int id, Listener<JSONObject> listener, ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagens/uti/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void AddViagem(int origem, int destino, int fkCarro, String dia, String hora, Listener<JSONObject> listener, ErrorListener errorListener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("origem", origem + "");
+        params.put("destino", destino + "");
+        params.put("fkCarro", fkCarro + "");
+        params.put("concluida", false + "");
+        params.put("dataSaida", dia + " " + hora);
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/viagens/",
+                new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetMyViagens(int id, Listener<JSONObject> listener, ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/myviagens/" + id,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+    */
 
 }
