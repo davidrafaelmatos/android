@@ -43,6 +43,10 @@ public class WS {
 
     private String url = "http://davidmatos.pt/slimIOS/index.php";
 
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+    // -- WS for User
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+
     // WS for Login
     public void Login(String username, String pass, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         Map<String, String> params = new HashMap<>();
@@ -51,6 +55,30 @@ public class WS {
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/user/login",
                 new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    // WS for Add a user
+    public void newUser(User user, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> u = new HashMap<>();
+        u.put("nome", user.getNome().toString());
+        u.put("username", user.getUsername().toString());
+        u.put("password", user.getPassword().toString());
+        u.put("email", user.getEmail().toString());
+        u.put("estado", String.valueOf(user.getEstado()));
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/user/new",
+                new JSONObject(u),
                 listener,
                 errorListener)
         {
@@ -83,7 +111,7 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
     */
-
+/*
     public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
         JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/marcas",
                 null,

@@ -79,10 +79,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnRegistar" />
+            app:layout_constraintStart_toEndOf="@+id/btnRegistarRegistar" />
 
         <Button
-            android:id="@+id/btnRegistar"
+            android:id="@+id/btnRegistarRegistar"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_marginBottom="10dp"
