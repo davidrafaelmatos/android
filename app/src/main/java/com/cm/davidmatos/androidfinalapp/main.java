@@ -22,6 +22,7 @@ public class main extends AppCompatActivity {
         btnDouBoleia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println("entrou DB");
                 Intent intent = new Intent(main.this, dbMain.class);
                 startActivity(intent);
             }
@@ -32,6 +33,7 @@ public class main extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(main.this, qbMain.class);
+                startActivity(intent);
             }
         });
 
