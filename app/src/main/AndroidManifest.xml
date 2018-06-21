@@ -19,7 +19,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".registar" />
-        <activity android:name=".main"></activity>
+        <activity android:name=".main" />
+        <activity android:name=".dbMain" />
+        <activity android:name=".qbMain"></activity>
     </application>
 
 </manifest>
