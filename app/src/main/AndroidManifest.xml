@@ -6,12 +6,12 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <activity android:name=".login">
             <intent-filter>
@@ -23,7 +23,10 @@
         <activity android:name=".registar" />
         <activity android:name=".main" />
         <activity android:name=".dbMain" />
-        <activity android:name=".qbMain"></activity>
+        <activity android:name=".qbMain" />
+        <activity android:name=".qbViagem" />
+        <activity android:name=".qbHistorico" />
+        <activity android:name=".qbProposta"></activity>
     </application>
 
 </manifest>
