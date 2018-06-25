@@ -117,7 +117,7 @@
             app:layout_constraintTop_toTopOf="@+id/constraintLayout2">
 
             <Button
-                android:id="@+id/btnViagem"
+                android:id="@+id/btnQBViagem"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginEnd="20dp"
@@ -126,14 +126,14 @@
                 android:background="@color/transWhite"
                 android:text="Procurar uma viagem"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toTopOf="@+id/btnHistorico"
+                app:layout_constraintBottom_toTopOf="@+id/btnQBHistorico"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/btnProposta"
+                android:id="@+id/btnQBProposta"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginBottom="20dp"
@@ -147,10 +147,10 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnHistorico" />
+                app:layout_constraintTop_toBottomOf="@+id/btnQBHistorico" />
 
             <Button
-                android:id="@+id/btnHistorico"
+                android:id="@+id/btnQBHistorico"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginEnd="20dp"
@@ -159,11 +159,11 @@
                 android:background="@color/transWhite"
                 android:text="Visualizar Historico"
                 android:textSize="20sp"
-                app:layout_constraintBottom_toTopOf="@+id/btnProposta"
+                app:layout_constraintBottom_toTopOf="@+id/btnQBProposta"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnViagem" />
+                app:layout_constraintTop_toBottomOf="@+id/btnQBViagem" />
         </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

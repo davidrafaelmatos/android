@@ -36,7 +36,6 @@ public class login extends AppCompatActivity {
         context = this;
 
         blurView = (ImageView) findViewById(R.id.blurView);
-
         BlurImage.with(getApplicationContext()).load(R.drawable.backgound).intensity(25).Async(true).into(blurView);
 
         txtUsername = (EditText) findViewById(R.id.txtUsername);
