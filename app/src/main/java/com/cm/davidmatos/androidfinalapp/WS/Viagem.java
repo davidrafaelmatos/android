@@ -34,6 +34,10 @@ public class Viagem {
         this.dataViagem = dataViagem;
     }
 
+    public Viagem (){
+
+    }
+
     public int getIdViagem() {
         return idViagem;
     }

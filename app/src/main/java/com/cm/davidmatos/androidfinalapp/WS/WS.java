@@ -2,6 +2,7 @@ package com.cm.davidmatos.androidfinalapp.WS;
 
 import android.content.Context;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -92,9 +93,14 @@ public class WS {
         };
         getRequestQueue().add(jsObjRequest);
     }
-/*
-    public void GetUserInfo(String id, Listener<JSONObject> listener, ErrorListener errorListener) {
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "user/" + id,
+
+
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+    // -- WS for Viagens
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+
+    public void GetViagensByDestino(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagens",
                 null,
                 listener,
                 errorListener)
@@ -110,7 +116,9 @@ public class WS {
 
         getRequestQueue().add(jsObjRequest);
     }
-    */
+
+
+
 /*
     public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
         JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/marcas",
