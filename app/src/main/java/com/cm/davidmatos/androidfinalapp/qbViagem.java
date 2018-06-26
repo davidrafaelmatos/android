@@ -1,17 +1,21 @@
 package com.cm.davidmatos.androidfinalapp;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.MatrixCursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -19,6 +23,8 @@ import com.android.volley.VolleyError;
 import com.cm.davidmatos.androidfinalapp.Utils.Utils;
 import com.cm.davidmatos.androidfinalapp.WS.Viagem;
 import com.cm.davidmatos.androidfinalapp.WS.WS;
+import com.cm.davidmatos.androidfinalapp.listViewAdapter.qbViagemAdapter;
+import com.google.android.gms.maps.MapView;
 import com.jackandphantom.blurimage.BlurImage;
 
 import org.json.JSONArray;
@@ -26,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class qbViagem extends AppCompatActivity {
 
@@ -37,8 +44,11 @@ public class qbViagem extends AppCompatActivity {
     EditText txtDestino;
     EditText txtOrigem;
     Button btnPesquisar;
-    ArrayList<Viagem> listaViagem = new ArrayList<>();
-    SimpleCursorAdapter adater;
+    List<Viagem> listaViagem = new ArrayList<>();
+    qbViagemAdapter adapter;
+    Dialog myDialog;
+    View myView;
+
 
 
     @Override
@@ -59,6 +69,7 @@ public class qbViagem extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!txtDestino.getText().toString().equals("") && !txtOrigem.getText().toString().equals("")){
+                    Toast.makeText(context, "entrou btn", Toast.LENGTH_SHORT).show();
                     carregaLista();
                 } else {
                     Toast.makeText(context, "Todos os campos tem que estar preenchidos", Toast.LENGTH_LONG).show();
@@ -74,6 +85,10 @@ public class qbViagem extends AppCompatActivity {
 
         blurViewQBViagemDestino = (ImageView) findViewById(R.id.blurViewQBViagemDestino);
         BlurImage.with(getApplicationContext()).load(R.drawable.bg_boleia).intensity(10).Async(true).into(blurViewQBViagemDestino);
+
+
+
+
     }
 
     @Override
@@ -96,12 +111,16 @@ public class qbViagem extends AppCompatActivity {
 
     private void carregaLista(){
 
+        hideNavigationBar();
+
         Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
             Boolean get;
             JSONArray viagens;
 
+
             @Override
             public void onResponse(JSONObject response) {
+                listaViagem.removeAll(listaViagem);
                 try {
                     get = response.getBoolean("get");
                     viagens = response.getJSONArray("result");
@@ -110,8 +129,6 @@ public class qbViagem extends AppCompatActivity {
                     Toast.makeText(context, "error JSON onResponse " + String.valueOf(e), Toast.LENGTH_LONG).show();
                 }
                 if (get){
-
-                    MatrixCursor mc = new MatrixCursor(new String[] {"Viagem", "Info", /* etc*/}); // properties from the JSONObjects
                     for (int i = 0; i < viagens.length(); i++) {
                         JSONObject jo;
                         try {
@@ -127,7 +144,8 @@ public class qbViagem extends AppCompatActivity {
                             Toast.makeText(context, "error try MC " + String.valueOf(e), Toast.LENGTH_LONG).show();
                         }
                     }
-
+                    adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
+                    listViagem.setAdapter(adapter);
                 } else {
                     Toast.makeText(context, "dados incorretos", Toast.LENGTH_LONG);
                 }
@@ -142,6 +160,45 @@ public class qbViagem extends AppCompatActivity {
             }
         };
         WS.getInstance(context).GetViagensByDestino(obj, errorListener);
+
+        listViagem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(context, "Carregou no id " + view.getTag(), Toast.LENGTH_SHORT).show();
+                showPopUp(listaViagem.get(position));
+            }
+        });
+
+    }
+
+    private void showPopUp (Viagem vi) {
+        TextView btnClose;
+        MapView mapViewQBViagem;
+        Button btnQBViagemCancelar;
+        Button btnQBViagemProposta;
+
+        myDialog.setContentView(R.layout.custom_popup_qb_viagem);
+        btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
+        btnQBViagemCancelar = (Button) myDialog.findViewById(R.id.btnQBViagemCancelar);
+        btnQBViagemProposta = (Button) myDialog.findViewById(R.id.btnQBViagemProposta);
+        mapViewQBViagem = (MapView) myDialog.findViewById(R.id.mapViewQBViagem);
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        btnQBViagemCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        myDialog.show();
+
     }
 
 }

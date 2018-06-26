@@ -160,6 +160,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView6" />
 
+        <ImageView
+            android:id="@+id/imageView8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/listViagem"
+            app:layout_constraintEnd_toEndOf="@+id/listViagem"
+            app:layout_constraintStart_toStartOf="@+id/listViagem"
+            app:layout_constraintTop_toTopOf="@+id/listViagem"
+            app:srcCompat="@color/transWhite" />
+
         <ListView
             android:id="@+id/listViagem"
             android:layout_width="0dp"
@@ -171,7 +181,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnPesquisar" />
+            app:layout_constraintTop_toBottomOf="@+id/btnPesquisar" >
+
+        </ListView>
 
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

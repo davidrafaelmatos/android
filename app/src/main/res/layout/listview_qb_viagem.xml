@@ -8,10 +8,11 @@
 
 
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/listviewQBViagemOrigemDestino"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="60"
+        android:textColor="@color/dark"
         android:text="TextView" />
 
     <LinearLayout
@@ -21,15 +22,17 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/listviewQBViagemData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/dark"
             android:text="TextView" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/listviewQBViagemLugares"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/dark"
             android:text="TextView" />
     </LinearLayout>
 </LinearLayout>

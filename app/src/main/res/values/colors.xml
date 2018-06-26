@@ -6,4 +6,10 @@
     <color name="transWhite">#80ffffff</color>
     <color name="verytransWhite">#15ffffff</color>
     <color name="dark">#2c2c2c</color>
+    <color name="blueDark">#2f333f</color>
+    <color name="blueLight">#49acd5</color>
+    <color name="green">#45bc62</color>
+    <color name="orange">#eaad43</color>
+    <color name="white">#fff</color>
+
 </resources>
