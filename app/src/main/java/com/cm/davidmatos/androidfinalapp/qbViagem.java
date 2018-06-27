@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.MatrixCursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,11 +22,16 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.cm.davidmatos.androidfinalapp.Utils.GetDirectionsData;
 import com.cm.davidmatos.androidfinalapp.Utils.Utils;
 import com.cm.davidmatos.androidfinalapp.WS.Viagem;
 import com.cm.davidmatos.androidfinalapp.WS.WS;
 import com.cm.davidmatos.androidfinalapp.listViewAdapter.qbViagemAdapter;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 import com.jackandphantom.blurimage.BlurImage;
 
 import org.json.JSONArray;
@@ -34,7 +41,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class qbViagem extends AppCompatActivity {
+public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
 
     ImageView blurViewQBViagemTitle;
     ImageView blurViewQBViagemOrigem;
@@ -47,15 +54,13 @@ public class qbViagem extends AppCompatActivity {
     List<Viagem> listaViagem = new ArrayList<>();
     qbViagemAdapter adapter;
     Dialog myDialog;
-    View myView;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.qb_viagem);
 
+        myDialog = new Dialog(this);
         context = this;
         hideNavigationBar();
 
@@ -86,15 +91,17 @@ public class qbViagem extends AppCompatActivity {
         blurViewQBViagemDestino = (ImageView) findViewById(R.id.blurViewQBViagemDestino);
         BlurImage.with(getApplicationContext()).load(R.drawable.bg_boleia).intensity(10).Async(true).into(blurViewQBViagemDestino);
 
-
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         hideNavigationBar();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
     }
 
     private void hideNavigationBar() {
@@ -173,15 +180,14 @@ public class qbViagem extends AppCompatActivity {
 
     private void showPopUp (Viagem vi) {
         TextView btnClose;
-        MapView mapViewQBViagem;
         Button btnQBViagemCancelar;
         Button btnQBViagemProposta;
 
-        myDialog.setContentView(R.layout.custom_popup_qb_viagem);
+        myDialog.setContentView(R.layout.custum_popup_qb_viagens);
+
         btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
         btnQBViagemCancelar = (Button) myDialog.findViewById(R.id.btnQBViagemCancelar);
         btnQBViagemProposta = (Button) myDialog.findViewById(R.id.btnQBViagemProposta);
-        mapViewQBViagem = (MapView) myDialog.findViewById(R.id.mapViewQBViagem);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -196,9 +202,32 @@ public class qbViagem extends AppCompatActivity {
                 myDialog.dismiss();
             }
         });
-
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
 
     }
+
+    private void getDirections(MapView mMap, Viagem vi, Context context) {
+
+        StringBuilder sb;
+        Object[] dataTransfer = new Object[4];
+
+        sb = new StringBuilder();
+        sb.append("https://maps.googleapis.com/maps/api/directions/json?");
+        sb.append("origin=" + vi.getOrigemCoordLat() + "," + vi.getOrigemCoordLong());
+        sb.append("&destination=" + vi.getDestinoCoordLat() + "," + vi.getDestinoCoordLong());
+        sb.append("&key=" + Utils.ApiKey);
+
+        GetDirectionsData getDirectionsData = new GetDirectionsData(context);
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = sb.toString();
+        dataTransfer[2] = new LatLng(Double.parseDouble(vi.getOrigemCoordLat()), Double.parseDouble(vi.getOrigemCoordLong()));
+        dataTransfer[3] = new LatLng(Double.parseDouble(vi.getDestinoCoordLat()), Double.parseDouble(vi.getDestinoCoordLong()));
+
+        getDirectionsData.execute(dataTransfer);
+
+    }
+
+
 
 }
