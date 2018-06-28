@@ -18,6 +18,9 @@ public class User {
         this.estado = estado;
     }
 
+    public User() {
+    }
+
     public int getIdUser() {
         return idUser;
     }

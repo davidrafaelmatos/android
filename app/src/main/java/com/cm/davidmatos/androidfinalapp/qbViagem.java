@@ -2,9 +2,6 @@ package com.cm.davidmatos.androidfinalapp;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +11,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,11 +19,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.cm.davidmatos.androidfinalapp.Utils.GetDirectionsData;
 import com.cm.davidmatos.androidfinalapp.Utils.Utils;
+import com.cm.davidmatos.androidfinalapp.WS.Carro;
+import com.cm.davidmatos.androidfinalapp.WS.User;
 import com.cm.davidmatos.androidfinalapp.WS.Viagem;
 import com.cm.davidmatos.androidfinalapp.WS.WS;
 import com.cm.davidmatos.androidfinalapp.listViewAdapter.qbViagemAdapter;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
@@ -133,7 +129,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                     viagens = response.getJSONArray("result");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(context, "error JSON onResponse " + String.valueOf(e), Toast.LENGTH_LONG).show();
+                    showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
                 }
                 if (get){
                     for (int i = 0; i < viagens.length(); i++) {
@@ -148,13 +144,12 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(context, "error try MC " + String.valueOf(e), Toast.LENGTH_LONG).show();
                         }
                     }
                     adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
                     listViagem.setAdapter(adapter);
                 } else {
-                    Toast.makeText(context, "dados incorretos", Toast.LENGTH_LONG);
+                    showErrorPopUp("Nao existe nenhuma viagem disponivel");
                 }
             }
 
@@ -163,15 +158,15 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context, "OnErrorResponse " + String.valueOf(error), Toast.LENGTH_LONG).show();
+                showErrorPopUp(String.valueOf(error));
             }
         };
+
         WS.getInstance(context).GetViagensByDestino(obj, errorListener);
 
         listViagem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(context, "Carregou no id " + view.getTag(), Toast.LENGTH_SHORT).show();
                 showPopUp(listaViagem.get(position));
             }
         });
@@ -179,29 +174,12 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     private void showPopUp (Viagem vi) {
-        TextView btnClose;
-        Button btnQBViagemCancelar;
-        Button btnQBViagemProposta;
 
         myDialog.setContentView(R.layout.custum_popup_qb_viagens);
 
-        btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
-        btnQBViagemCancelar = (Button) myDialog.findViewById(R.id.btnQBViagemCancelar);
-        btnQBViagemProposta = (Button) myDialog.findViewById(R.id.btnQBViagemProposta);
+        loadData(vi, myDialog);
+        fillEntryViagem(vi, myDialog);
 
-        btnClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                myDialog.dismiss();
-            }
-        });
-
-        btnQBViagemCancelar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                myDialog.dismiss();
-            }
-        });
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
 
@@ -228,6 +206,167 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
 
     }
 
+    private void showErrorPopUp(String errorMessage){
+        TextView btnClose;
+        TextView txtDescricaoErrorPopUp;
+        Button btnErrorPopUp;
 
+        myDialog.setContentView(R.layout.error_popup);
+
+        btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
+        btnErrorPopUp = (Button) myDialog.findViewById(R.id.btnErrorPopUp);
+        txtDescricaoErrorPopUp = (TextView) myDialog.findViewById(R.id.txtDescricaoErrorPopUp);
+
+        txtDescricaoErrorPopUp.setText(errorMessage);
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        btnErrorPopUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    private void loadData(Viagem vi, Dialog dM) {
+        final User u = new User();
+        final Carro c = new Carro();
+        final Dialog dialog = dM;
+
+        // Loads User
+        Response.Listener<JSONObject> objUser = new Response.Listener<JSONObject>() {
+            Boolean get;
+            JSONObject user;
+
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    get = response.getBoolean("Get");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (get){
+                    try {
+                        user = response.getJSONArray("result").getJSONObject(0);
+                        u.setNome(user.getString("nome"));
+                        u.setEmail(user.getString("email"));
+                        fillEntryUser(dialog, u);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    showErrorPopUp("Nenhum utilizador encontrado");
+                }
+            }
+        };
+
+        Response.ErrorListener errorListenerUser = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        };
+        WS.getInstance(context).GetUserById(vi.getFkUser(), objUser, errorListenerUser);
+
+        // Loasd Car
+        Response.Listener<JSONObject> objCarro = new Response.Listener<JSONObject>() {
+            Boolean get;
+            JSONObject carro;
+
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    get = response.getBoolean("Get");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (get){
+                    try {
+                        carro = response.getJSONArray("Result").getJSONObject(0);
+                        c.setMarca(carro.getString("marca"));
+                        c.setModelo(carro.getString("modelo"));
+                        fillEntryCarro(dialog, c);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    showErrorPopUp("Nenhum carro encontrado");
+                }
+            }
+        };
+
+        Response.ErrorListener errorListenerCarro = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        };
+        WS.getInstance(context).GetCarroById(vi.getFkCar(), objCarro, errorListenerCarro);
+
+    }
+
+    private void fillEntryViagem(Viagem vi, Dialog dm){
+
+        TextView btnClose;
+        Button btnQBViagemCancelar;
+        Button btnQBViagemProposta;
+        TextView txtPopUpOrigem, txtPopUpDestino, txtPopUpData;
+
+        btnClose = (TextView) dm.findViewById(R.id.btnClose);
+        btnQBViagemCancelar = (Button) dm.findViewById(R.id.btnQBViagemCancelar);
+        btnQBViagemProposta = (Button) dm.findViewById(R.id.btnQBViagemProposta);
+
+        txtPopUpOrigem = (TextView) dm.findViewById(R.id.txtPopUpOrigem);
+        txtPopUpDestino = (TextView) dm.findViewById(R.id.txtPopUpDestino);
+        txtPopUpData = (TextView) dm.findViewById(R.id.txtPopUpData);
+
+        txtPopUpOrigem.setText(vi.getOrigemNome());
+        txtPopUpDestino.setText(vi.getDestinoNome());
+        txtPopUpData.setText(vi.getDataViagem());
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                hideNavigationBar();
+            }
+        });
+
+        btnQBViagemCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+    }
+
+    private void fillEntryCarro(Dialog dm, Carro c){
+
+        TextView txtPopUpVeiculo;
+
+        txtPopUpVeiculo = (TextView) dm.findViewById(R.id.txtPopUpVeiculo);
+
+        txtPopUpVeiculo.setText(c.getMarca() + " " + c.getModelo());
+    }
+
+    private void fillEntryUser(Dialog dm, User u){
+
+        TextView txtPopUpUtilizador;
+
+        txtPopUpUtilizador = (TextView) dm.findViewById(R.id.txtPopUpUser);
+
+        txtPopUpUtilizador.setText(u.getNome());
+
+    }
 
 }

@@ -94,6 +94,25 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    // WS to Get User By IdUser
+
+    public void GetUserById(int idUser, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/user/" + idUser,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
 
     // -- --------------------------------------------------------------------------------------------------------------------------------
     // -- WS for Viagens
@@ -117,7 +136,27 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+    // -- WS for Carro
+    // -- --------------------------------------------------------------------------------------------------------------------------------
 
+    public void GetCarroById(int idCarro, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/carro/" + idCarro,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
 
 /*
     public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
