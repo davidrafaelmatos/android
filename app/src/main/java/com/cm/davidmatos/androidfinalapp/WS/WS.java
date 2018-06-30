@@ -158,6 +158,37 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+    // -- WS for Proposta
+    // -- --------------------------------------------------------------------------------------------------------------------------------
+
+    // WS for Add a proposta
+    public void newProposta(Proposta proposta, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> u = new HashMap<>();
+        u.put("fkViagem", "" + proposta.getFkViagem());
+        u.put("fkUser", "" + proposta.getFkUser());
+        u.put("estado", "" + 1);
+        u.put("origemNome", proposta.getOrigemNome().toString());
+        u.put("origemCoordLat", proposta.getOrigemCoordLat().toString());
+        u.put("origemCoordLong", proposta.getOrigemCoordLong().toString());
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/user/new",
+                new JSONObject(u),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
+
+
 /*
     public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
         JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.GET, url + "/marcas",

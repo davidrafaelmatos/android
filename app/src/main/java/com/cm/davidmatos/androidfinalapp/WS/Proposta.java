@@ -20,6 +20,10 @@ public class Proposta {
         this.origemCoordLong = origemCoordLong;
     }
 
+    public Proposta() {
+
+    }
+
     public int getIdProposta() {
         return idProposta;
     }

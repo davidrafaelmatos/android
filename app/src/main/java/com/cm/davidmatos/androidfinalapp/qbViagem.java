@@ -2,8 +2,12 @@ package com.cm.davidmatos.androidfinalapp;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
+import android.os.ResultReceiver;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,9 +21,12 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.cm.davidmatos.androidfinalapp.Utils.Constants;
+import com.cm.davidmatos.androidfinalapp.Utils.FetchCoordinatesIntentService;
 import com.cm.davidmatos.androidfinalapp.Utils.GetDirectionsData;
 import com.cm.davidmatos.androidfinalapp.Utils.Utils;
 import com.cm.davidmatos.androidfinalapp.WS.Carro;
+import com.cm.davidmatos.androidfinalapp.WS.Proposta;
 import com.cm.davidmatos.androidfinalapp.WS.User;
 import com.cm.davidmatos.androidfinalapp.WS.Viagem;
 import com.cm.davidmatos.androidfinalapp.WS.WS;
@@ -50,6 +57,8 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
     List<Viagem> listaViagem = new ArrayList<>();
     qbViagemAdapter adapter;
     Dialog myDialog;
+    AddressResultReceiver mResultReceiver;
+    Proposta p = new Proposta();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +68,8 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         myDialog = new Dialog(this);
         context = this;
         hideNavigationBar();
+
+        mResultReceiver = new AddressResultReceiver(new Handler());
 
         listViagem = (ListView) findViewById(R.id.listViagem);
 
@@ -168,6 +179,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 showPopUp(listaViagem.get(position));
+                p.setFkViagem(listaViagem.get(position).getIdViagem());
             }
         });
 
@@ -348,6 +360,13 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                 myDialog.dismiss();
             }
         });
+
+        btnQBViagemProposta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startIntentCoordinatesService();
+            }
+        });
     }
 
     private void fillEntryCarro(Dialog dm, Carro c){
@@ -366,6 +385,91 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         txtPopUpUtilizador = (TextView) dm.findViewById(R.id.txtPopUpUser);
 
         txtPopUpUtilizador.setText(u.getNome());
+
+    }
+
+    class AddressResultReceiver extends ResultReceiver {
+
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            if (resultData.containsKey(Constants.RESULT_DATA_KEY)) {
+                String mAddressOut = resultData.getString(Constants.RESULT_DATA_KEY);
+            }
+            if (resultData.containsKey(Constants.LATITUDE)) {
+                p.setEstado(1);
+                p.setFkUser(Utils.idUser);
+                p.setOrigemCoordLat(String.valueOf(resultData.getDouble(Constants.LATITUDE)));
+                p.setOrigemCoordLong(String.valueOf(resultData.getDouble(Constants.LONGITUDE)));
+                p.setOrigemNome(txtOrigem.getText().toString());
+            }
+
+            addProposta();
+
+        }
+    }
+
+    protected void startIntentCoordinatesService () {
+        Intent intent = new Intent(this, FetchCoordinatesIntentService.class);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, txtOrigem.getText().toString());
+        intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        startService(intent);
+    }
+
+    private void addProposta() {
+
+        Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
+            Boolean get;
+            JSONArray viagens;
+
+
+            @Override
+            public void onResponse(JSONObject response) {
+                listaViagem.removeAll(listaViagem);
+                try {
+                    get = response.getBoolean("get");
+                    viagens = response.getJSONArray("result");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
+                }
+                if (get){
+                    for (int i = 0; i < viagens.length(); i++) {
+                        JSONObject jo;
+                        try {
+                            jo = viagens.getJSONObject(i);
+                            if (jo.getString("destinoNome").toLowerCase().contains(txtDestino.getText().toString().toLowerCase())) {
+                                Viagem v = new Viagem(jo.getInt("idViagem"), jo.getString("origemNome"), jo.getString("origemCoordLat"), jo.getString("origemCoordLong"), jo.getString("destinoNome"),
+                                        jo.getString("destinoCoordLat"), jo.getString("destinoCoordLong"), jo.getInt("fkCar"), jo.getInt("fkUser"), jo.getDouble("totalKm"), jo.getInt("estado"),
+                                        jo.getInt("quantidadeLugares"), jo.getInt("lugaresDisponiveis"), jo.getString("dataViagem"));
+                                listaViagem.add(v);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
+                    listViagem.setAdapter(adapter);
+                } else {
+                    showErrorPopUp("Nao existe nenhuma viagem disponivel");
+                }
+            }
+
+        };
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                showErrorPopUp(String.valueOf(error));
+            }
+        };
+
+        WS.getInstance(context).newProposta(p, obj, errorListener);
+
 
     }
 
