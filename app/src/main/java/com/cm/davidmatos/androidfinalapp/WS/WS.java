@@ -172,7 +172,7 @@ public class WS {
         u.put("origemNome", proposta.getOrigemNome().toString());
         u.put("origemCoordLat", proposta.getOrigemCoordLat().toString());
         u.put("origemCoordLong", proposta.getOrigemCoordLong().toString());
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/user/new",
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/proposta/new",
                 new JSONObject(u),
                 listener,
                 errorListener)
@@ -188,6 +188,27 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    // -- get proposta By idUser
+
+    public void GetPropostaByIdUser(int idUser, int idViagem, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> u = new HashMap<>();
+        u.put("idUser", "" + idUser );
+        u.put("idViagem", "" + idViagem);
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/propostasByIdUserAndIdViagem",
+                new JSONObject(u),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
 
 /*
     public void GetMarcas(Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {

@@ -59,6 +59,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
     Dialog myDialog;
     AddressResultReceiver mResultReceiver;
     Proposta p = new Proposta();
+    Viagem v = new Viagem();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +136,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onResponse(JSONObject response) {
                 listaViagem.removeAll(listaViagem);
+
                 try {
                     get = response.getBoolean("get");
                     viagens = response.getJSONArray("result");
@@ -145,14 +147,63 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                 if (get){
                     for (int i = 0; i < viagens.length(); i++) {
                         JSONObject jo;
+
                         try {
                             jo = viagens.getJSONObject(i);
-                            if (jo.getString("destinoNome").toLowerCase().contains(txtDestino.getText().toString().toLowerCase())) {
-                                Viagem v = new Viagem(jo.getInt("idViagem"), jo.getString("origemNome"), jo.getString("origemCoordLat"), jo.getString("origemCoordLong"), jo.getString("destinoNome"),
-                                        jo.getString("destinoCoordLat"), jo.getString("destinoCoordLong"), jo.getInt("fkCar"), jo.getInt("fkUser"), jo.getDouble("totalKm"), jo.getInt("estado"),
-                                        jo.getInt("quantidadeLugares"), jo.getInt("lugaresDisponiveis"), jo.getString("dataViagem"));
-                                listaViagem.add(v);
+
+                            // -------------------------------------------------------------------------------------------------------------------------
+                            // --
+                            // -------------------------------------------------------------------------------------------------------------------------
+
+                            if (jo.getString("destinoNome").toLowerCase().contains(txtDestino.getText().toString().toLowerCase()) &&
+                                    jo.getString("origemNome").toLowerCase().contains(txtOrigem.getText().toString().toLowerCase())) {
+                                 v.setIdViagem(jo.getInt("idViagem"));
+                                 v.setOrigemNome(jo.getString("origemNome"));
+                                 v.setOrigemCoordLat(jo.getString("origemCoordLat"));
+                                 v.setOrigemCoordLong(jo.getString("origemCoordLong"));
+                                 v.setDestinoNome(jo.getString("destinoNome"));
+                                 v.setDestinoCoordLat(jo.getString("destinoCoordLat"));
+                                 v.setDestinoCoordLong(jo.getString("destinoCoordLong"));
+                                 v.setFkCar(jo.getInt("fkCar"));
+                                 v.setFkUser(jo.getInt("fkUser"));
+                                 v.setTotalKm(jo.getDouble("totalKm"));
+                                 v.setEstado(jo.getInt("estado"));
+                                 v.setQuantidadeLugares(jo.getInt("quantidadeLugares"));
+                                 v.setLugaresDisponiveis(jo.getInt("lugaresDisponiveis"));
+                                 v.setDataViagem(jo.getString("dataViagem"));
                             }
+
+                            Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
+                                Boolean get;
+
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        get = response.getBoolean("get");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
+                                    }
+                                    if (!get){
+                                        listaViagem.add(v);
+                                    }
+                                }
+
+                            };
+
+                            Response.ErrorListener errorListener = new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    showErrorPopUp(String.valueOf(error));
+                                }
+                            };
+
+                            WS.getInstance(context).GetPropostaByIdUser(Utils.idUser, jo.getInt("idViagem"), obj, errorListener);
+
+                            // -------------------------------------------------------------------------------------------------------------------------
+                            // --
+                            // -------------------------------------------------------------------------------------------------------------------------
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -230,6 +281,36 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         txtDescricaoErrorPopUp = (TextView) myDialog.findViewById(R.id.txtDescricaoErrorPopUp);
 
         txtDescricaoErrorPopUp.setText(errorMessage);
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        btnErrorPopUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    private void showSuccessPopUp(String successMessage){
+        TextView btnClose;
+        TextView txtDescricaoSuccessPopUp;
+        Button btnErrorPopUp;
+
+        myDialog.setContentView(R.layout.sucess_popup);
+
+        btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
+        btnErrorPopUp = (Button) myDialog.findViewById(R.id.btnErrorPopUp);
+        txtDescricaoSuccessPopUp = (TextView) myDialog.findViewById(R.id.txtDescricaoSuccessPopUp);
+
+        txtDescricaoSuccessPopUp.setText(successMessage);
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -406,9 +487,8 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                 p.setOrigemCoordLat(String.valueOf(resultData.getDouble(Constants.LATITUDE)));
                 p.setOrigemCoordLong(String.valueOf(resultData.getDouble(Constants.LONGITUDE)));
                 p.setOrigemNome(txtOrigem.getText().toString());
+                addProposta();
             }
-
-            addProposta();
 
         }
     }
@@ -417,45 +497,28 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         Intent intent = new Intent(this, FetchCoordinatesIntentService.class);
         intent.putExtra(Constants.LOCATION_DATA_EXTRA, txtOrigem.getText().toString());
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        System.out.println(txtOrigem.getText().toString() + " " + mResultReceiver);
         startService(intent);
     }
 
     private void addProposta() {
 
         Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
-            Boolean get;
-            JSONArray viagens;
-
+            Boolean post;
 
             @Override
             public void onResponse(JSONObject response) {
-                listaViagem.removeAll(listaViagem);
                 try {
-                    get = response.getBoolean("get");
-                    viagens = response.getJSONArray("result");
+                    post = response.getBoolean("Post");
+                    System.out.println(post);
                 } catch (JSONException e) {
                     e.printStackTrace();
                     showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
                 }
-                if (get){
-                    for (int i = 0; i < viagens.length(); i++) {
-                        JSONObject jo;
-                        try {
-                            jo = viagens.getJSONObject(i);
-                            if (jo.getString("destinoNome").toLowerCase().contains(txtDestino.getText().toString().toLowerCase())) {
-                                Viagem v = new Viagem(jo.getInt("idViagem"), jo.getString("origemNome"), jo.getString("origemCoordLat"), jo.getString("origemCoordLong"), jo.getString("destinoNome"),
-                                        jo.getString("destinoCoordLat"), jo.getString("destinoCoordLong"), jo.getInt("fkCar"), jo.getInt("fkUser"), jo.getDouble("totalKm"), jo.getInt("estado"),
-                                        jo.getInt("quantidadeLugares"), jo.getInt("lugaresDisponiveis"), jo.getString("dataViagem"));
-                                listaViagem.add(v);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
-                    listViagem.setAdapter(adapter);
+                if (post){
+                    showSuccessPopUp("A sua proposta foi adicionada com sucesso");
                 } else {
-                    showErrorPopUp("Nao existe nenhuma viagem disponivel");
+                    showErrorPopUp("Nao foi possivel adicionar a sua proposta");
                 }
             }
 

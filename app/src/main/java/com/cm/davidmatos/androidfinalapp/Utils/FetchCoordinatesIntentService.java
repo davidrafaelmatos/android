@@ -43,6 +43,7 @@ public class FetchCoordinatesIntentService extends IntentService {
         List<Address> addresses = null;
 
         try{
+            System.out.println(myLocation);
             addresses = geocoder.getFromLocationName(myLocation, 5);
         } catch (IOException e) {
             e.printStackTrace();
