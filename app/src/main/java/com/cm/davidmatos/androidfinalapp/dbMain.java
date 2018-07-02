@@ -19,7 +19,8 @@ public class dbMain extends AppCompatActivity {
         btnCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(this, )
+                Intent intent = new Intent(getApplicationContext(), dbCar.class);
+                startActivity(intent);
             }
         });
 
