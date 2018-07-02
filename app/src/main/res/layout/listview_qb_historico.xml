@@ -5,9 +5,12 @@
     android:weightSum="100">
 
     <TextView
-        android:id="@+id/txtOrigemDestino"
+        android:id="@+id/lblOrigemDestino"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="@color/dark"
+        android:textSize="15sp"
+        android:textStyle="bold"
         android:layout_weight="60"
         android:text="TextView" />
 
@@ -18,15 +21,19 @@
         android:layout_weight="40">
 
         <TextView
-            android:id="@+id/txtData"
+            android:id="@+id/lblData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/dark"
+            android:textSize="15sp"
             android:text="TextView" />
 
         <TextView
-            android:id="@+id/txtEstadoPagamento"
+            android:id="@+id/lblEstadoPagamento"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/dark"
             android:text="TextView" />
     </LinearLayout>
 </LinearLayout>
