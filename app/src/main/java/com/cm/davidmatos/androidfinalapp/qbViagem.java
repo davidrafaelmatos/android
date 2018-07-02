@@ -126,96 +126,62 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
 
     private void carregaLista(){
 
-        hideNavigationBar();
-
         Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
             Boolean get;
-            JSONArray viagens;
+            JSONArray ViagemProposta;
+            JSONObject Proposta;
+            JSONObject Viagem;
 
 
             @Override
-            public void onResponse(JSONObject response) {
-                listaViagem.removeAll(listaViagem);
-
+        public void onResponse(JSONObject response) {
+            listaViagem.removeAll(listaViagem);
+            try {
+                get = response.getBoolean("get");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (get){
                 try {
-                    get = response.getBoolean("get");
-                    viagens = response.getJSONArray("result");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
-                }
-                if (get){
-                    for (int i = 0; i < viagens.length(); i++) {
-                        JSONObject jo;
+                    ViagemProposta = response.getJSONArray("result");
+                    for (int i = 0; i < ViagemProposta.length(); i++){
+                        System.out.println(i);
+                        Proposta = ViagemProposta.getJSONObject(i).getJSONObject("Proposta");
+                        Viagem = ViagemProposta.getJSONObject(i).getJSONObject("Viagem");
+                        Viagem viagem = new Viagem(
+                                Viagem.getInt("idViagem"),
+                                Viagem.getString("origemNome"),
+                                Viagem.getString("origemCoordLat"),
+                                Viagem.getString("origemCoordLong"),
+                                Viagem.getString("destinoNome"),
+                                Viagem.getString("destinoCoordLat"),
+                                Viagem.getString("destinoCoordLong"),
+                                Viagem.getInt("fkCar"),
+                                Viagem.getInt("fkUser"),
+                                Viagem.getDouble("totalKm"),
+                                Viagem.getInt("estado"),
+                                Viagem.getInt("quantidadeLugares"),
+                                Viagem.getInt("lugaresDisponiveis"),
+                                Viagem.getString("dataViagem")
+                        );
 
-                        try {
-                            jo = viagens.getJSONObject(i);
-
-                            // -------------------------------------------------------------------------------------------------------------------------
-                            // --
-                            // -------------------------------------------------------------------------------------------------------------------------
-
-                            if (jo.getString("destinoNome").toLowerCase().contains(txtDestino.getText().toString().toLowerCase()) &&
-                                    jo.getString("origemNome").toLowerCase().contains(txtOrigem.getText().toString().toLowerCase())) {
-                                 v.setIdViagem(jo.getInt("idViagem"));
-                                 v.setOrigemNome(jo.getString("origemNome"));
-                                 v.setOrigemCoordLat(jo.getString("origemCoordLat"));
-                                 v.setOrigemCoordLong(jo.getString("origemCoordLong"));
-                                 v.setDestinoNome(jo.getString("destinoNome"));
-                                 v.setDestinoCoordLat(jo.getString("destinoCoordLat"));
-                                 v.setDestinoCoordLong(jo.getString("destinoCoordLong"));
-                                 v.setFkCar(jo.getInt("fkCar"));
-                                 v.setFkUser(jo.getInt("fkUser"));
-                                 v.setTotalKm(jo.getDouble("totalKm"));
-                                 v.setEstado(jo.getInt("estado"));
-                                 v.setQuantidadeLugares(jo.getInt("quantidadeLugares"));
-                                 v.setLugaresDisponiveis(jo.getInt("lugaresDisponiveis"));
-                                 v.setDataViagem(jo.getString("dataViagem"));
+                        if (!Proposta.getBoolean("get")){
+                            if (viagem.getDestinoNome().toLowerCase().contains(txtDestino.getText().toString().toLowerCase()) &&
+                                    viagem.getOrigemNome().toLowerCase().contains(txtOrigem.getText().toString().toLowerCase())) {
+                                listaViagem.add(viagem);
                             }
-
-                            Response.Listener<JSONObject> obj = new Response.Listener<JSONObject>() {
-                                Boolean get;
-
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try {
-                                        get = response.getBoolean("get");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        showErrorPopUp("error on JSON onResponse " + String.valueOf(e));
-                                    }
-                                    if (!get){
-                                        listaViagem.add(v);
-                                    }
-                                }
-
-                            };
-
-                            Response.ErrorListener errorListener = new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    showErrorPopUp(String.valueOf(error));
-                                }
-                            };
-
-                            WS.getInstance(context).GetPropostaByIdUser(Utils.idUser, jo.getInt("idViagem"), obj, errorListener);
-
-                            // -------------------------------------------------------------------------------------------------------------------------
-                            // --
-                            // -------------------------------------------------------------------------------------------------------------------------
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
                     }
-                    adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
-                    listViagem.setAdapter(adapter);
-                } else {
-                    showErrorPopUp("Nao existe nenhuma viagem disponivel");
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                adapter = new qbViagemAdapter(getApplicationContext(), listaViagem);
+                listViagem.setAdapter(adapter);
+            } else {
+                showErrorPopUp("Nenhum historico encontrado");
             }
-
-        };
+        }
+    };
 
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
@@ -224,7 +190,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
             }
         };
 
-        WS.getInstance(context).GetViagensByDestino(obj, errorListener);
+        WS.getInstance(context).GetviagensProposta(obj, errorListener);
 
         listViagem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -233,6 +199,8 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
                 p.setFkViagem(listaViagem.get(position).getIdViagem());
             }
         });
+
+        hideNavigationBar();
 
     }
 
@@ -323,6 +291,7 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 myDialog.dismiss();
+                carregaLista();
             }
         });
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

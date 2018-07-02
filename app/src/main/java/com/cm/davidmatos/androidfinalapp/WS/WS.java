@@ -9,6 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.cm.davidmatos.androidfinalapp.Utils.Utils;
 
 
 import org.json.JSONArray;
@@ -120,6 +121,24 @@ public class WS {
 
     public void GetViagensByDestino(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagens",
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetviagensProposta(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagensProposta/" + Utils.idUser,
                 null,
                 listener,
                 errorListener)
