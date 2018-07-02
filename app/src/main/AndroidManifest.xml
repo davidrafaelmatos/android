@@ -34,6 +34,7 @@
         <activity android:name=".qbViagem" />
         <activity android:name=".qbHistorico" />
         <activity android:name=".qbProposta" />
+        <activity android:name=".dbHistorico" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
