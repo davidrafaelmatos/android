@@ -7,18 +7,18 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.cm.davidmatos.androidfinalapp.R;
-import com.cm.davidmatos.androidfinalapp.WS.BoleiaViagem;
+import com.cm.davidmatos.androidfinalapp.WS.User;
 import com.cm.davidmatos.androidfinalapp.WS.Viagem;
 
 import java.util.List;
 
 
-public class dbHistoricoAdapter extends BaseAdapter {
+public class dbHistoricoUserAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<Viagem> mLista;
+    private List<User> mLista;
 
-    public dbHistoricoAdapter(Context mContext, List<Viagem> mLista) {
+    public dbHistoricoUserAdapter(Context mContext, List<User> mLista) {
         this.mContext = mContext;
         this.mLista = mLista;
     }
@@ -35,22 +35,26 @@ public class dbHistoricoAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return mLista.get(position).getIdViagem();
+        return mLista.get(position).getIdUser();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View v = View.inflate(mContext, R.layout.listview_db_historico, null);
+        View v = View.inflate(mContext, R.layout.listview_db_historico_user, null);
         TextView lblOrigemDestino = (TextView) v.findViewById(R.id.lblOrigemDestino);
         TextView lblData = (TextView) v.findViewById(R.id.lblData);
         TextView lblEstadoPagamento = (TextView) v.findViewById(R.id.lblEstadoPagamento);
 
-        Viagem vi = mLista.get(position);
+        User u = mLista.get(position);
 
-        lblOrigemDestino.setText("De: " + vi.getOrigemNome() + " Para: " + vi.getDestinoNome());
-        lblData.setText("Data: " + vi.getDataViagem());
+        lblOrigemDestino.setText(u.getNome());
+        if (u.getEstado() == 1) {
+            lblData.setText("Pago");
+        } else {
+            lblData.setText("Por pagar");
+        }
 
-        v.setTag(vi.getIdViagem());
+        v.setTag(u.getIdUser());
         return v;
     }
 }

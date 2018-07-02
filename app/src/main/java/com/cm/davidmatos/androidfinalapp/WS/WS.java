@@ -137,6 +137,43 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    public void GetViagensByIdUser(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagemByIdUser/" + Utils.idUser,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetViagemComposta(int idViagem, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagemComposta/" + idViagem,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+
     public void GetviagensProposta(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagensProposta/" + Utils.idUser,
                 null,
