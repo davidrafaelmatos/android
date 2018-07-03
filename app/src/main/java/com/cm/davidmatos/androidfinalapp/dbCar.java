@@ -41,6 +41,7 @@ public class dbCar extends AppCompatActivity {
     String[] lMarca;
     String[] lModel;
     Spinner spMarca, spModelo, spCombustivel;
+    Double consumos;
 
 
     @Override
@@ -139,14 +140,13 @@ public class dbCar extends AppCompatActivity {
             }
         };
         WS.getInstance(context).GetCarroByIdUser(objUser, errorListenerUser);
-        /*
+
         listCarros.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showPopUp(listViagem.get(position));
+                showPopUpEdit(listaCarros.get(position));
             }
         });
-        */
     }
 
     private void showErrorPopUp(String errorMessage){
@@ -220,12 +220,141 @@ public class dbCar extends AppCompatActivity {
 
     }
 
+    private void showPopUpEdit(Carro c) {
+
+        myDialog.setContentView(R.layout.custum_popup_db_car_add);
+
+        TextView btnClose;
+        Button btnCancelar, btnRegistar;
+        Spinner spMarca, spModelo, spCombustivel;
+        EditText txtConsumos;
+
+        spMarca = myDialog.findViewById(R.id.spMarca);
+        spModelo = myDialog.findViewById(R.id.spModelo);
+        spCombustivel = myDialog.findViewById(R.id.spCombustivel);
+
+        spMarca.setEnabled(false);
+        spCombustivel.setEnabled(false);
+        spModelo.setEnabled(false);
+
+        String[] auxMarca = new String[1];
+        auxMarca[0] = c.getMarca();
+        ArrayAdapter<String> adapterMarca = new ArrayAdapter<String>(this, R.layout.spinner_item, auxMarca);
+        spMarca.setAdapter(adapterMarca);
+
+        String[] auxModelo = new String[1];
+        auxModelo[0] = c.getModelo();
+        ArrayAdapter<String> adapterModelo = new ArrayAdapter<String>(this, R.layout.spinner_item, auxModelo);
+        spModelo.setAdapter(adapterModelo);
+
+        String[] auxCombustivel = new String[1];
+        if (c.getCombustivel() == 0) {
+            auxCombustivel[0] = "Gasolina";
+        } else if (c.getCombustivel() == 1) {
+            auxCombustivel[0] = "Gasoleo";
+        } else {
+            auxCombustivel[0] = "Eletrico";
+        }
+
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, R.layout.spinner_item, auxCombustivel);
+        spCombustivel.setAdapter(adapterCombustivel);
+
+        txtConsumos = myDialog.findViewById(R.id.txtConsumos);
+        txtConsumos.setText(c.getConsumo() + "");
+
+        btnClose = myDialog.findViewById(R.id.btnClose);
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                carregaLista();
+            }
+        });
+        final int idCarro = c.getIdCarro();
+        btnCancelar = myDialog.findViewById(R.id.btnCancelar);
+        btnCancelar.setText("Apagar");
+        btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Response.Listener<JSONObject> objMarca = new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+                            Boolean delete = response.getBoolean("delete");
+                            if (delete) {
+                                showSuccessPopUp("O veiculo foi Removdo com Sucesso");
+                            } else {
+                                showErrorPopUp("Ocorreu um erro ao remover o veiculo, tente novamente mais tarde");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                };
+                WS.getInstance(context).DeleteCarro(idCarro, objMarca, errorListenerMarca);
+            }
+        });
+
+        btnRegistar = myDialog.findViewById(R.id.btnRegistar);
+        btnRegistar.setText("Editar");
+
+        Double.valueOf(txtConsumos.getText().toString());
+        btnRegistar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Response.Listener<JSONObject> objMarca = new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Boolean put = response.getBoolean("edit");
+
+                            if (put){
+                                showSuccessPopUp("O veiculo foi editado com sucesso");
+                            } else {
+                                showErrorPopUp("Ocorreu um erro ao editar o veiculo");
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                };
+                WS.getInstance(context).UpdateCarro(idCarro, getConsumos(), objMarca, errorListenerMarca);
+            }
+        });
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+
+    }
+
+    private Double getConsumos() {
+        EditText txtConsumos;
+        txtConsumos = myDialog.findViewById(R.id.txtConsumos);
+        return Double.valueOf(txtConsumos.getText().toString());
+    }
+
     private void getDataCar(Dialog dialog){
         EditText txtComsumos, txtQuantidadeLugar;
         txtComsumos = myDialog.findViewById(R.id.txtConsumos);
-        txtQuantidadeLugar = myDialog.findViewById(R.id.txtQuantidadeLugar);
 
-        if ((txtComsumos.getText().toString().isEmpty() || txtComsumos.getText().toString().equals("")) && (txtQuantidadeLugar.getText().toString().isEmpty() || txtQuantidadeLugar.getText().toString().equals("")) && Utils.modelo.equals("") && Utils.marca.equals("")){
+        if ((txtComsumos.getText().toString().isEmpty() || txtComsumos.getText().toString().equals("")) && Utils.modelo.equals("") && Utils.marca.equals("")){
             showErrorPopUp("Todos os campos tem que estar ");
         } else {
              Carro c = new Carro(
@@ -312,7 +441,7 @@ public class dbCar extends AppCompatActivity {
         spModelo.setEnabled(false);
 
         String[] comb = {"Gasolina", "Gasoleo", "Eletrico"};
-        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, comb);
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, R.layout.spinner_item, comb);
         spCombustivel.setAdapter(adapterCombustivel);
         spCombustivel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -357,7 +486,6 @@ public class dbCar extends AppCompatActivity {
                 }
             }
         };
-
         Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -369,7 +497,7 @@ public class dbCar extends AppCompatActivity {
     }
 
     private void fillDataCarMake(){
-        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, lMarca);
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, R.layout.spinner_item, lMarca);
         spMarca.setAdapter(adapterCombustivel);
         spMarca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -425,7 +553,7 @@ public class dbCar extends AppCompatActivity {
     }
 
     private void fillDataCarModel(){
-        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, lModel);
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, R.layout.spinner_item, lModel);
         spModelo.setAdapter(adapterCombustivel);
         spModelo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

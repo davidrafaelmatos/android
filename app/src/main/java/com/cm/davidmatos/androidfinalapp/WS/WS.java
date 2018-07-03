@@ -214,6 +214,46 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    public void UpdateCarro(int idCarro, Double consumos, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("consumo", String.valueOf(consumos));
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.PUT, url + "/carro/edit/Android/" + idCarro,
+                new JSONObject(params),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void DeleteCarro(int idCarro, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.DELETE, url + "/carro/delete/" + idCarro,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+
     // WS for Add a user
     public void newCar(Carro carro, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         Map<String, String> u = new HashMap<>();
