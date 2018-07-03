@@ -466,7 +466,6 @@ public class qbViagem extends AppCompatActivity implements OnMapReadyCallback {
         Intent intent = new Intent(this, FetchCoordinatesIntentService.class);
         intent.putExtra(Constants.LOCATION_DATA_EXTRA, txtOrigem.getText().toString());
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
-        System.out.println(txtOrigem.getText().toString() + " " + mResultReceiver);
         startService(intent);
     }
 

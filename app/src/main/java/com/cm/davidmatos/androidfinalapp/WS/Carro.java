@@ -10,7 +10,7 @@ public class Carro {
     private int fkUser;
     private int estado;
 
-    public Carro ( int id, String marca, String modelo, int combustivel, double consumo, int fkUser, int estado) {
+    public Carro ( int id, String marca, String modelo, int combustivel, double consumo , int fkUser, int estado) {
         this.idCarro = id;
         this.marca = marca;
         this.modelo = modelo;

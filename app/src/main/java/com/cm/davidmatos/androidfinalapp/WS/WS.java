@@ -214,8 +214,69 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    // WS for Add a user
+    public void newCar(Carro carro, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> u = new HashMap<>();
+        u.put("marca", carro.getMarca().toString());
+        u.put("modelo", carro.getModelo().toString());
+        u.put("combustivel", String.valueOf(carro.getCombustivel()));
+        u.put("consumo", String.valueOf(carro.getConsumo()));
+        u.put("fkUser", String.valueOf(carro.getFkUser()));
+        u.put("estado", String.valueOf(carro.getEstado()));
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/carro/new",
+                new JSONObject(u),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
+
     public void GetCarroByIdUser(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/carroByIdUser/" + Utils.idUser,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetMake(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, "https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json",
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
+    public void GetModel(String make, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, "https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/" + make + "?format=json",
                 null,
                 listener,
                 errorListener)

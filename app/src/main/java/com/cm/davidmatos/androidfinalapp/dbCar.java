@@ -4,20 +4,24 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.cm.davidmatos.androidfinalapp.Utils.Utils;
 import com.cm.davidmatos.androidfinalapp.WS.Carro;
 import com.cm.davidmatos.androidfinalapp.WS.WS;
 import com.cm.davidmatos.androidfinalapp.listViewAdapter.dbCarAdapter;
-import com.cm.davidmatos.androidfinalapp.listViewAdapter.dbHistoricoAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +37,11 @@ public class dbCar extends AppCompatActivity {
     List<Carro> listaCarros = new ArrayList<>();
     Dialog myDialog;
     ListView listCarros;
+    FloatingActionButton btnAdd;
+    String[] lMarca;
+    String[] lModel;
+    Spinner spMarca, spModelo, spCombustivel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,14 @@ public class dbCar extends AppCompatActivity {
         listCarros = (ListView) findViewById(R.id.listviewCar);
 
         carregaLista();
+
+        btnAdd = (FloatingActionButton) findViewById(R.id.btnAdd);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopUpAdd();
+            }
+        });
 
     }
 
@@ -161,4 +178,365 @@ public class dbCar extends AppCompatActivity {
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
     }
+
+    private void showPopUpAdd() {
+
+        myDialog.setContentView(R.layout.custum_popup_db_car_add);
+
+        TextView btnClose;
+        Button btnCancelar, btnRegistar;
+
+        btnClose = myDialog.findViewById(R.id.btnClose);
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                carregaLista();
+            }
+        });
+
+        btnCancelar = myDialog.findViewById(R.id.btnCancelar);
+        btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                carregaLista();
+            }
+        });
+
+        btnRegistar = myDialog.findViewById(R.id.btnRegistar);
+        btnRegistar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                getDataCar(myDialog);
+            }
+        });
+
+        loadDataCarAdd(myDialog);
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+
+    }
+
+    private void getDataCar(Dialog dialog){
+        EditText txtComsumos, txtQuantidadeLugar;
+        txtComsumos = myDialog.findViewById(R.id.txtConsumos);
+        txtQuantidadeLugar = myDialog.findViewById(R.id.txtQuantidadeLugar);
+
+        if ((txtComsumos.getText().toString().isEmpty() || txtComsumos.getText().toString().equals("")) && (txtQuantidadeLugar.getText().toString().isEmpty() || txtQuantidadeLugar.getText().toString().equals("")) && Utils.modelo.equals("") && Utils.marca.equals("")){
+            showErrorPopUp("Todos os campos tem que estar ");
+        } else {
+             Carro c = new Carro(
+                     1,
+                     Utils.marca,
+                     Utils.modelo,
+                     Utils.combustivel,
+                     Double.parseDouble(txtComsumos.getText().toString()),
+                     Utils.idUser,
+                     1
+             );
+
+            Response.Listener<JSONObject> objMarca = new Response.Listener<JSONObject>() {
+
+                JSONObject Post ;
+
+                @Override
+                public void onResponse(JSONObject response) {
+
+                    try {
+                        Boolean get = response.getBoolean("Post");
+
+                        if (get){
+                            showSuccessPopUp("O Veiculo foi adicionado com sucesso");
+                        } else {
+                            showErrorPopUp("Ocorreu um erro durante a incerção do carro");
+                        }
+
+                        fillDataCarMake();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            };
+            WS.getInstance(context).newCar(c, objMarca, errorListenerMarca);
+
+        }
+    }
+
+    private void showSuccessPopUp(String successMessage){
+        TextView btnClose;
+        TextView txtDescricaoSuccessPopUp;
+        Button btnErrorPopUp;
+
+        myDialog.setContentView(R.layout.sucess_popup);
+
+        btnClose = (TextView) myDialog.findViewById(R.id.btnClose);
+        btnErrorPopUp = (Button) myDialog.findViewById(R.id.btnErrorPopUp);
+        txtDescricaoSuccessPopUp = (TextView) myDialog.findViewById(R.id.txtDescricaoSuccessPopUp);
+
+        txtDescricaoSuccessPopUp.setText(successMessage);
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        btnErrorPopUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                carregaLista();
+            }
+        });
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    private void loadDataCarAdd(Dialog dialog) {
+
+        spMarca = dialog.findViewById(R.id.spMarca);
+        spModelo = dialog.findViewById(R.id.spModelo);
+        spCombustivel = dialog.findViewById(R.id.spCombustivel);
+
+        spModelo.setEnabled(false);
+
+        String[] comb = {"Gasolina", "Gasoleo", "Eletrico"};
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, comb);
+        spCombustivel.setAdapter(adapterCombustivel);
+        spCombustivel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Utils.combustivel = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Utils.combustivel = 0;
+            }
+        });
+
+        loadDataCarMake();
+
+    }
+
+    private void loadDataCarMake() {
+
+        Response.Listener<JSONObject> objMarca = new Response.Listener<JSONObject>() {
+
+            JSONArray Result;
+            JSONObject Marca;
+
+            @Override
+            public void onResponse(JSONObject response) {
+
+                int count = 0;
+
+                try {
+                    Result = response.getJSONArray("Results");
+                    lMarca = new String[Result.length()];
+                    for (int i = 0; i < Result.length(); i++){
+                        Marca = Result.getJSONObject(i);
+
+                        lMarca[count] = Marca.getString("MakeName");
+                        count++;
+                    }
+                    fillDataCarMake();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        };
+        WS.getInstance(context).GetMake(objMarca, errorListenerMarca);
+
+    }
+
+    private void fillDataCarMake(){
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, lMarca);
+        spMarca.setAdapter(adapterCombustivel);
+        spMarca.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                String marca = lMarca[position];
+                Utils.marca = marca;
+                loadDataCarModel(marca);
+                spModelo.setEnabled(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                showErrorPopUp("Tem que selecionar uma marca");
+            }
+        });
+    }
+
+    private void loadDataCarModel(String make) {
+
+        Response.Listener<JSONObject> objMarca = new Response.Listener<JSONObject>() {
+
+            JSONArray Result;
+            JSONObject Modelo;
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Result = response.getJSONArray("Results");
+                    lModel = new String[Result.length()];
+                    int count = 0;
+                    for (int i = 0; i < Result.length(); i++){
+                        Modelo = Result.getJSONObject(i);
+
+                        lModel[count] = Modelo.getString("Model_Name");
+                        count++;
+
+                    }
+                    fillDataCarModel();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Response.ErrorListener errorListenerMarca = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        };
+        WS.getInstance(context).GetModel(make, objMarca, errorListenerMarca);
+    }
+
+    private void fillDataCarModel(){
+        ArrayAdapter<String> adapterCombustivel = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, lModel);
+        spModelo.setAdapter(adapterCombustivel);
+        spModelo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Utils.modelo = lModel[position];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                showErrorPopUp("Tem que selecionar um Modelo");
+            }
+        });
+    }
+
+    public class Make {
+
+        private int MakeId;
+        private String MakeName;
+        private int VehicleTypeId;
+        private String VehicleTypeName;
+
+        public Make(int makeId, String makeName, int vehicleTypeId, String vehicleTypeName) {
+            MakeId = makeId;
+            MakeName = makeName;
+            VehicleTypeId = vehicleTypeId;
+            VehicleTypeName = vehicleTypeName;
+        }
+
+        public Make() {
+        }
+
+        public int getMakeId() {
+            return MakeId;
+        }
+
+        public void setMakeId(int makeId) {
+            MakeId = makeId;
+        }
+
+        public String getMakeName() {
+            return MakeName;
+        }
+
+        public void setMakeName(String makeName) {
+            MakeName = makeName;
+        }
+
+        public int getVehicleTypeId() {
+            return VehicleTypeId;
+        }
+
+        public void setVehicleTypeId(int vehicleTypeId) {
+            VehicleTypeId = vehicleTypeId;
+        }
+
+        public String getVehicleTypeName() {
+            return VehicleTypeName;
+        }
+
+        public void setVehicleTypeName(String vehicleTypeName) {
+            VehicleTypeName = vehicleTypeName;
+        }
+    }
+
+    public class Model {
+        private int Make_ID;
+        private String Make_Name;
+        private int Model_ID;
+        private String Model_Name;
+
+        public Model(int make_ID, String make_Name, int model_ID, String model_Name) {
+            Make_ID = make_ID;
+            Make_Name = make_Name;
+            Model_ID = model_ID;
+            Model_Name = model_Name;
+        }
+
+        public Model() {
+        }
+
+        public int getMake_ID() {
+            return Make_ID;
+        }
+
+        public void setMake_ID(int make_ID) {
+            Make_ID = make_ID;
+        }
+
+        public String getMake_Name() {
+            return Make_Name;
+        }
+
+        public void setMake_Name(String make_Name) {
+            Make_Name = make_Name;
+        }
+
+        public int getModel_ID() {
+            return Model_ID;
+        }
+
+        public void setModel_ID(int model_ID) {
+            Model_ID = model_ID;
+        }
+
+        public String getModel_Name() {
+            return Model_Name;
+        }
+
+        public void setModel_Name(String model_Name) {
+            Model_Name = model_Name;
+        }
+    }
+
 }
