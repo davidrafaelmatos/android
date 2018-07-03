@@ -3,6 +3,7 @@ package com.cm.davidmatos.androidfinalapp.Utils;
 
 
 import com.cm.davidmatos.androidfinalapp.R;
+import com.google.android.gms.maps.model.LatLng;
 
 public class Utils {
 
@@ -14,4 +15,9 @@ public class Utils {
     public static String marca;
     public static String modelo;
     public static int combustivel;
+    public static int idCarro;
+    public static LatLng origemCoord;
+    public static LatLng destinoCoord;
+    public static String origemNome;
+    public static String destinoNome;
 }

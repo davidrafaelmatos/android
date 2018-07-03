@@ -9,5 +9,6 @@ public class Constants {
     public static int FAILURE_RESULT = 0;
     public static int SUCCESS_RESULT = 1;
     public static String RESULT_DATA_KEY = "RESULT_DATA_KEY";
+    public static String TIPO = "TIPO";
 
 }

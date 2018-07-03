@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">androidFinalApp</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_db_viagem2">Map</string>
 </resources>
