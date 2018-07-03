@@ -155,6 +155,25 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+
+    public void GetViagensPropostaByViagem(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagensPropostaByViagem/" + Utils.idUser,
+                null,
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+
+        getRequestQueue().add(jsObjRequest);
+    }
+
     public void GetViagemComposta(int idViagem, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagemComposta/" + idViagem,
                 null,
@@ -173,6 +192,39 @@ public class WS {
         getRequestQueue().add(jsObjRequest);
     }
 
+    // WS for Add a viagem
+    public void newViagem(Viagem viagem, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        Map<String, String> u = new HashMap<>();
+        u.put("origemNome", viagem.getOrigemNome() );
+        u.put("origemCoordLat", viagem.getOrigemCoordLat());
+        u.put("origemCoordLong", viagem.getOrigemCoordLong());
+        u.put("destinoNome", viagem.getDestinoNome());
+        u.put("destinoCoordLat", viagem.getDestinoCoordLat());
+        u.put("destinoCoordLong", viagem.getDestinoCoordLong());
+        u.put("fkCar", String.valueOf(viagem.getFkCar()));
+        u.put("fkUser", String.valueOf(viagem.getFkUser()));
+        u.put("totalKm", String.valueOf(viagem.getTotalKm()));
+        u.put("estado", String.valueOf(viagem.getEstado()));
+        u.put("quantidadeLugares", String.valueOf(viagem.getQuantidadeLugares()));
+        u.put("lugaresDisponiveis", String.valueOf(viagem.getLugaresDisponiveis()));
+        u.put("dataViagem", viagem.getDataViagem());
+
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url + "/viagem/new",
+                new JSONObject(u),
+                listener,
+                errorListener)
+        {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json; charset=utf-8");
+                headers.put("User-agent", System.getProperty("http.agent"));
+                return headers;
+            }
+        };
+        getRequestQueue().add(jsObjRequest);
+    }
 
     public void GetviagensProposta(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url + "/viagensProposta/" + Utils.idUser,

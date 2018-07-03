@@ -28,6 +28,7 @@ public class FetchCoordinatesIntentService extends IntentService {
         if(resultado.size() > 0) {
             bundle.putDouble(Constants.LATITUDE, Double.valueOf(resultado.get(0).toString()));
             bundle.putDouble(Constants.LONGITUDE, Double.valueOf(resultado.get(1).toString()));
+            bundle.putString(Constants.TIPO, resultado.get(2).toString());
         }
         mReceiver.send(resultCode, bundle);
     }
@@ -39,7 +40,7 @@ public class FetchCoordinatesIntentService extends IntentService {
 
         String myLocation = intent.getStringExtra(Constants.LOCATION_DATA_EXTRA);
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
-
+        String tipo = intent.getStringExtra(Constants.TIPO);
         List<Address> addresses = null;
 
         try{
@@ -63,6 +64,7 @@ public class FetchCoordinatesIntentService extends IntentService {
             ArrayList resultado = new ArrayList();
             resultado.add(latitude);
             resultado.add(longitude);
+            resultado.add(tipo);
             deliverResultToReceiver(Constants.SUCCESS_RESULT, resultado);
         }
     }

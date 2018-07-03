@@ -20,4 +20,5 @@ public class Utils {
     public static LatLng destinoCoord;
     public static String origemNome;
     public static String destinoNome;
+    public static int quantidadeLugares;
 }

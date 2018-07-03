@@ -32,6 +32,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class dbViagem extends AppCompatActivity {
 
@@ -51,6 +53,7 @@ public class dbViagem extends AppCompatActivity {
 
         context = this;
         myDialog = new Dialog(this);
+        mResultReceiver = new AddressResultReceiver(new Handler());
 
         txtOrigem = findViewById(R.id.txtOrigem);
         txtDestino = findViewById(R.id.txtDestino);
@@ -77,10 +80,9 @@ public class dbViagem extends AppCompatActivity {
                         (txtLugares.getText().toString().equals("") || txtLugares.getText().toString().isEmpty())){
                     showErrorPopUp("Todos os campos tem que estar prenchidos");
                 } else {
-                    startIntentCoordinatesService();
-                    startIntentCoordinatesService();
-                    Utils.origemNome = txtOrigem.getText().toString();
-                    Utils.destinoNome = txtDestino.getText().toString();
+                    startIntentCoordinatesService("origem", txtOrigem.getText().toString());
+                    startIntentCoordinatesService("destino", txtDestino.getText().toString());
+                    Utils.quantidadeLugares = Integer.parseInt(txtLugares.getText().toString());
                     showSuccessPopUp("A calcular o seu percurso");
                 }
             }
@@ -159,7 +161,7 @@ public class dbViagem extends AppCompatActivity {
     private void showSuccessPopUp(String successMessage){
         TextView btnClose;
         TextView txtDescricaoSuccessPopUp;
-        Button btnErrorPopUp;
+        final Button btnErrorPopUp;
 
         myDialog.setContentView(R.layout.sucess_popup);
 
@@ -168,6 +170,24 @@ public class dbViagem extends AppCompatActivity {
         txtDescricaoSuccessPopUp = (TextView) myDialog.findViewById(R.id.txtDescricaoSuccessPopUp);
 
         txtDescricaoSuccessPopUp.setText(successMessage);
+
+        btnErrorPopUp.setVisibility(View.INVISIBLE);
+
+        Timer buttonTimer = new Timer();
+        buttonTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        btnErrorPopUp.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        }, 3000);
+
 
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,16 +253,27 @@ public class dbViagem extends AppCompatActivity {
                 String mAddressOut = resultData.getString(Constants.RESULT_DATA_KEY);
             }
             if (resultData.containsKey(Constants.LATITUDE)) {
-                System.out.println( "entrou fds");
+                if (resultData.getString(Constants.TIPO).equals("origem")){
+                    LatLng origem = new LatLng(resultData.getDouble(Constants.LATITUDE),
+                            resultData.getDouble(Constants.LONGITUDE));
+                    Utils.origemCoord = origem;
+                    Utils.origemNome = txtOrigem.getText().toString();
+                } else {
+                    LatLng destino = new LatLng(resultData.getDouble(Constants.LATITUDE),
+                                                resultData.getDouble(Constants.LONGITUDE));
+                    Utils.destinoCoord = destino;
+                    Utils.destinoNome = txtDestino.getText().toString();
+                }
             }
 
         }
     }
 
-    protected void startIntentCoordinatesService () {
+    protected void startIntentCoordinatesService (String tipo, String aux) {
         Intent intent = new Intent(this, FetchCoordinatesIntentService.class);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, txtOrigem.getText().toString());
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA, aux);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.TIPO, tipo);
         startService(intent);
     }
 }
